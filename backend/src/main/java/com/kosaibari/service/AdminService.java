@@ -1,6 +1,7 @@
 package com.kosaibari.service;
 
 import com.kosaibari.domain.Butcher;
+import com.kosaibari.domain.ButcherAvailability;
 import com.kosaibari.domain.User;
 import com.kosaibari.repository.ButcherRepository;
 import com.kosaibari.repository.CustomerRepository;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -76,5 +78,35 @@ public class AdminService {
     @Transactional
     public void toggleUserActive(UUID userId, boolean active) {
         userRepo.updateActive(userId, active);
+    }
+
+    // Availability management for any butcher (admin override).
+    // The admin UI navigates by user_id (since /admin/users lists users), so we resolve
+    // to the butcher profile here. users.id ↔ butchers.user_id is 1:1.
+    private Butcher requireButcherForUser(UUID userId) {
+        return butcherRepo.findByUserId(userId)
+            .orElseThrow(() -> new RuntimeException("Butcher profile not found for user"));
+    }
+
+    public Butcher getButcherForUser(UUID userId) {
+        return requireButcherForUser(userId);
+    }
+
+    public List<ButcherAvailability> getButcherAvailabilityByUser(UUID userId, LocalDate from, LocalDate to) {
+        Butcher butcher = requireButcherForUser(userId);
+        return butcherRepo.findAvailability(butcher.getId(), from, to);
+    }
+
+    @Transactional
+    public void setButcherAvailabilityByUser(UUID userId, LocalDate date,
+                                              ButcherAvailability.AvailabilityStatus status, String note) {
+        Butcher butcher = requireButcherForUser(userId);
+        butcherRepo.setAvailability(butcher.getId(), date, status, note);
+    }
+
+    @Transactional
+    public void deleteButcherAvailabilityByUser(UUID userId, LocalDate date) {
+        Butcher butcher = requireButcherForUser(userId);
+        butcherRepo.deleteAvailability(butcher.getId(), date);
     }
 }

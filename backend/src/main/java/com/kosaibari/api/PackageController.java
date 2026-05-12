@@ -51,11 +51,16 @@ public class PackageController {
             ));
         }
 
+        User currentUser = UserContext.require();
+        if (currentUser.getUserType() != User.UserType.CUSTOMER) {
+            return ResponseEntity.status(403).body(Map.of(
+                "error", Map.of("message", "শুধুমাত্র গ্রাহকরা প্যাকেজ কিনতে পারবেন")
+            ));
+        }
+
         // Get package details
         var pkg = subscriptionRepo.findPackageById(packageId)
             .orElseThrow(() -> new RuntimeException("Package not found"));
-
-        User currentUser = UserContext.require();
 
         try {
             // Create bKash payment
@@ -174,12 +179,22 @@ public class PackageController {
                         )
                     ));
                 } else {
-                    // Payment not completed
+                    // Payment not completed — surface the bKash error so the user (and logs) see why
                     paymentRepo.updateFailed(payment.getId());
+                    String bkashCode = executeResponse.getStatusCode();
+                    String bkashMsg  = executeResponse.getStatusMessage();
+                    String userMsg = "পেমেন্ট সম্পন্ন হয়নি";
+                    if (bkashMsg != null && !bkashMsg.isBlank()) {
+                        userMsg = userMsg + " (bKash: " + bkashMsg
+                            + (bkashCode != null && !bkashCode.isBlank() ? " — " + bkashCode : "")
+                            + ")";
+                    }
                     return ResponseEntity.ok(Map.of(
                         "data", Map.of(
                             "status", "FAILED",
-                            "message", "পেমেন্ট সম্পন্ন হয়নি"
+                            "message", userMsg,
+                            "bkashStatusCode", bkashCode == null ? "" : bkashCode,
+                            "bkashStatusMessage", bkashMsg == null ? "" : bkashMsg
                         )
                     ));
                 }

@@ -109,7 +109,7 @@ public class ButcherService {
     public ButcherDto unlock(UUID butcherId) {
         User currentUser = UserContext.require();
         if (currentUser.getUserType() != User.UserType.CUSTOMER) {
-            throw new RuntimeException("Only customers can unlock butchers");
+            throw new RuntimeException("কসাইয়ের নম্বর শুধুমাত্র গ্রাহক পাবেন");
         }
 
         var customer = customerRepo.findByUserId(currentUser.getId())

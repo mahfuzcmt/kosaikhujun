@@ -181,12 +181,13 @@ public class BkashService {
                 JsonNode json = objectMapper.readTree(response.getBody());
 
                 String statusCode = json.has("statusCode") ? json.get("statusCode").asText() : "";
+                String statusMessage = json.has("statusMessage") ? json.get("statusMessage").asText() : "";
                 String transactionStatus = json.has("transactionStatus") ? json.get("transactionStatus").asText() : "";
 
                 BkashExecuteResponse result = new BkashExecuteResponse();
                 result.setPaymentID(paymentID);
                 result.setStatusCode(statusCode);
-                result.setStatusMessage(json.has("statusMessage") ? json.get("statusMessage").asText() : "");
+                result.setStatusMessage(statusMessage);
                 result.setTransactionStatus(transactionStatus);
 
                 if (json.has("trxID")) {
@@ -202,13 +203,18 @@ public class BkashService {
                     result.setMerchantInvoiceNumber(json.get("merchantInvoiceNumber").asText());
                 }
 
-                log.info("bKash payment executed: paymentID={}, status={}, trxID={}",
-                    paymentID, transactionStatus, result.getTrxID());
+                if (!"0000".equals(statusCode) || !"Completed".equalsIgnoreCase(transactionStatus)) {
+                    log.error("bKash execute returned non-success: paymentID={}, statusCode={}, statusMessage={}, transactionStatus={}, body={}",
+                        paymentID, statusCode, statusMessage, transactionStatus, response.getBody());
+                } else {
+                    log.info("bKash payment executed: paymentID={}, statusCode={}, transactionStatus={}, trxID={}",
+                        paymentID, statusCode, transactionStatus, result.getTrxID());
+                }
 
                 return result;
             }
 
-            log.error("bKash execute failed: {}", response.getBody());
+            log.error("bKash execute failed: status={}, body={}", response.getStatusCode(), response.getBody());
             throw new RuntimeException("Failed to execute bKash payment");
 
         } catch (Exception e) {

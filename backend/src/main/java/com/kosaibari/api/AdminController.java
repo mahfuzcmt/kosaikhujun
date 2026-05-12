@@ -2,6 +2,7 @@ package com.kosaibari.api;
 
 import com.kosaibari.domain.AppSettings;
 import com.kosaibari.domain.Butcher;
+import com.kosaibari.domain.ButcherAvailability;
 import com.kosaibari.domain.District;
 import com.kosaibari.domain.Thana;
 import com.kosaibari.domain.User;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -72,6 +74,49 @@ public class AdminController {
             "data", ButcherDto.from(butcher, true),
             "message", "Butcher blocked"
         ));
+    }
+
+    // Butcher availability management by user_id (admin override — works for any butcher).
+    // Path uses user_id because the admin UI navigates from /admin/users where rows carry user_id;
+    // we resolve to butcher_id in AdminService.
+    @GetMapping("/users/{userId}/butcher")
+    public ResponseEntity<Map<String, Object>> getButcherForUser(@PathVariable UUID userId) {
+        Butcher butcher = adminService.getButcherForUser(userId);
+        return ResponseEntity.ok(Map.of("data", ButcherDto.from(butcher, true)));
+    }
+
+    @GetMapping("/users/{userId}/butcher-availability")
+    public ResponseEntity<Map<String, Object>> getButcherAvailability(
+        @PathVariable UUID userId,
+        @RequestParam(required = false) String from,
+        @RequestParam(required = false) String to
+    ) {
+        LocalDate fromDate = from != null ? LocalDate.parse(from) : LocalDate.now();
+        LocalDate toDate = to != null ? LocalDate.parse(to) : fromDate.plusDays(30);
+        List<ButcherAvailability> availability = adminService.getButcherAvailabilityByUser(userId, fromDate, toDate);
+        return ResponseEntity.ok(Map.of("data", availability));
+    }
+
+    @PostMapping("/users/{userId}/butcher-availability")
+    public ResponseEntity<Map<String, Object>> setButcherAvailability(
+        @PathVariable UUID userId,
+        @RequestBody Map<String, String> req
+    ) {
+        LocalDate date = LocalDate.parse(req.get("date"));
+        ButcherAvailability.AvailabilityStatus status =
+            ButcherAvailability.AvailabilityStatus.valueOf(req.get("status"));
+        String note = req.get("note");
+        adminService.setButcherAvailabilityByUser(userId, date, status, note);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Availability updated"));
+    }
+
+    @DeleteMapping("/users/{userId}/butcher-availability")
+    public ResponseEntity<Map<String, Object>> deleteButcherAvailability(
+        @PathVariable UUID userId,
+        @RequestParam String date
+    ) {
+        adminService.deleteButcherAvailabilityByUser(userId, LocalDate.parse(date));
+        return ResponseEntity.ok(Map.of("success", true));
     }
 
     @DeleteMapping("/users/{id}")

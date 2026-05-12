@@ -46,10 +46,10 @@ services:
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
       JWT_SECRET: change-me-in-production-this-is-only-for-local-dev-32bytes
-      KOSAIBARI_CORS_ALLOWED_ORIGINS: http://103.187.22.131:3001,http://localhost:3001
-      BKASH_CALLBACK_URL: http://103.187.22.131:3001/payment/callback
+      KOSAIBARI_CORS_ALLOWED_ORIGINS: https://kosailagbe.com,https://www.kosailagbe.com,http://103.187.22.131:3001,http://localhost:3001
+      BKASH_CALLBACK_URL: https://kosailagbe.com/payment/callback
       KOSAIBARI_UPLOAD_DIR: /app/uploads
-      KOSAIBARI_UPLOAD_BASE_URL: http://103.187.22.131:8082/api/uploads
+      KOSAIBARI_UPLOAD_BASE_URL: https://kosailagbe.com/api/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,7 +63,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://103.187.22.131:8082/api
+        NEXT_PUBLIC_API_URL: https://kosailagbe.com/api
     container_name: kosaibari-frontend
     ports:
       - "3001:3000"

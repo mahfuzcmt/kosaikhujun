@@ -25,13 +25,13 @@ public class SmsService {
     private static final String DEFAULT_SENDER_ID = "8809617642636";
 
     public void sendOtp(String phone, String otp) {
-        String message = String.format("কসাই বাড়ি: আপনার OTP কোড হলো %s। এই কোড ৫ মিনিট বৈধ।", otp);
+        String message = String.format("কসাই লাগবে: আপনার OTP কোড হলো %s। এই কোড ৫ মিনিট বৈধ।", otp);
         send(phone, message);
     }
 
     public void sendPackagePurchaseConfirmation(String phone, String packageName, int contactLimit, String trxId) {
         String message = String.format(
-            "কসাই বাড়ি: আপনার \"%s\" প্যাকেজ সফলভাবে কেনা হয়েছে। আপনি এখন %d জন কসাইয়ের নম্বর দেখতে পারবেন। TrxID: %s",
+            "কসাই লাগবে: আপনার \"%s\" প্যাকেজ সফলভাবে কেনা হয়েছে। আপনি এখন %d জন কসাইয়ের নম্বর দেখতে পারবেন। TrxID: %s",
             packageName, contactLimit, trxId
         );
         send(phone, message);
@@ -39,7 +39,7 @@ public class SmsService {
 
     public void sendUnlockLimitReached(String phone, String butcherName, int unlockCount) {
         String message = String.format(
-            "কসাই বাড়ি: অভিনন্দন %s! আপনার প্রোফাইল %d জন গ্রাহক আনলক করেছেন এবং আপনার সীমা পূর্ণ হয়েছে।",
+            "কসাই লাগবে: অভিনন্দন %s! আপনার প্রোফাইল %d জন গ্রাহক আনলক করেছেন এবং আপনার সীমা পূর্ণ হয়েছে।",
             butcherName, unlockCount
         );
         send(phone, message);

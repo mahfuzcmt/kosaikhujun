@@ -13,7 +13,7 @@ public class HealthController {
     public ResponseEntity<Map<String, Object>> health() {
         return ResponseEntity.ok(Map.of(
             "status", "UP",
-            "service", "Kosai Bari API",
+            "service", "Kosai Lagbe API",
             "version", "1.0.0"
         ));
     }
