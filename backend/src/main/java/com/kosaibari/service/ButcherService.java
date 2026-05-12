@@ -65,9 +65,9 @@ public class ButcherService {
         return butcherRepo.findById(butcher.getId()).orElse(butcher);
     }
 
-    public List<ButcherDto> search(Integer districtId, Integer thanaId, int page, int limit) {
+    public List<ButcherDto> search(Integer districtId, Integer thanaId, String q, int page, int limit) {
         int offset = page * limit;
-        List<Butcher> butchers = butcherRepo.findApproved(districtId, thanaId, offset, limit);
+        List<Butcher> butchers = butcherRepo.findApproved(districtId, thanaId, q, offset, limit);
 
         // Check which butchers are unlocked for current customer
         User currentUser = UserContext.get();
@@ -85,8 +85,8 @@ public class ButcherService {
             .toList();
     }
 
-    public int countApproved(Integer districtId, Integer thanaId) {
-        return butcherRepo.countApproved(districtId, thanaId);
+    public int countApproved(Integer districtId, Integer thanaId, String q) {
+        return butcherRepo.countApproved(districtId, thanaId, q);
     }
 
     public ButcherDto getById(UUID id) {

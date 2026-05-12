@@ -96,7 +96,7 @@ public class ButcherRepository {
         return Optional.of(b);
     }
 
-    public List<Butcher> findApproved(Integer districtId, Integer thanaId, int offset, int limit) {
+    public List<Butcher> findApproved(Integer districtId, Integer thanaId, String q, int offset, int limit) {
         StringBuilder sql = new StringBuilder("""
             SELECT DISTINCT b.*, u.phone, u.name,
                    (SELECT COUNT(*) FROM unlocked_contacts uc WHERE uc.butcher_id = b.id) as unlock_count,
@@ -137,6 +137,10 @@ public class ButcherRepository {
             sql.append(" AND bt.thana_id = ?");
             params.add(thanaId);
         }
+        if (q != null && !q.isBlank()) {
+            sql.append(" AND u.name ILIKE ?");
+            params.add("%" + q.trim() + "%");
+        }
         // Sort by remaining slots DESC (more remaining capacity first), then by rating DESC
         sql.append(" ORDER BY remaining_slots DESC, b.rating DESC, b.created_at DESC LIMIT ? OFFSET ?");
         params.add(limit);
@@ -149,7 +153,7 @@ public class ButcherRepository {
         return butchers;
     }
 
-    public int countApproved(Integer districtId, Integer thanaId) {
+    public int countApproved(Integer districtId, Integer thanaId, String q) {
         StringBuilder sql = new StringBuilder("""
             SELECT COUNT(DISTINCT b.id)
             FROM butchers b
@@ -187,6 +191,10 @@ public class ButcherRepository {
         if (thanaId != null) {
             sql.append(" AND bt.thana_id = ?");
             params.add(thanaId);
+        }
+        if (q != null && !q.isBlank()) {
+            sql.append(" AND u.name ILIKE ?");
+            params.add("%" + q.trim() + "%");
         }
         return jdbc.queryForObject(sql.toString(), Integer.class, params.toArray());
     }

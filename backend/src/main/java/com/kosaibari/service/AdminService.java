@@ -30,7 +30,7 @@ public class AdminService {
         int totalUsers = userRepo.countAll();
         int totalButchers = butcherRepo.countAll();
         int pendingButchers = butcherRepo.countPending();
-        int approvedButchers = butcherRepo.countApproved(null, null);
+        int approvedButchers = butcherRepo.countApproved(null, null, null);
         int totalCustomers = customerRepo.countAll();
         int paidCustomers = subscriptionRepo.countPaidCustomers();
 

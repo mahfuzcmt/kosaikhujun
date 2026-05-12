@@ -124,6 +124,12 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("data", settings));
     }
 
+    @GetMapping("/settings/bkash")
+    public ResponseEntity<Map<String, Object>> getBkashSettings() {
+        List<AppSettings> settings = settingsRepo.findByKeyPrefix("bkash_");
+        return ResponseEntity.ok(Map.of("data", settings));
+    }
+
     @PatchMapping("/settings/{key}")
     public ResponseEntity<Map<String, Object>> updateSetting(
         @PathVariable String key,
@@ -154,6 +160,27 @@ public class AdminController {
         return ResponseEntity.ok(Map.of(
             "success", true,
             "message", "SMS settings updated successfully"
+        ));
+    }
+
+    @PostMapping("/settings/bkash")
+    public ResponseEntity<Map<String, Object>> updateBkashSettings(@RequestBody Map<String, String> req) {
+        Map<String, String> fieldToKey = Map.of(
+            "baseUrl",     "bkash_base_url",
+            "appKey",      "bkash_app_key",
+            "appSecret",   "bkash_app_secret",
+            "username",    "bkash_username",
+            "password",    "bkash_password",
+            "callbackUrl", "bkash_callback_url"
+        );
+        for (var entry : fieldToKey.entrySet()) {
+            if (req.containsKey(entry.getKey())) {
+                settingsRepo.update(entry.getValue(), req.get(entry.getKey()));
+            }
+        }
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "bKash settings updated successfully"
         ));
     }
 }

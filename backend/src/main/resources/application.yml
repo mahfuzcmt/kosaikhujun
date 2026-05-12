@@ -66,14 +66,8 @@ kosaibari:
     allowed-origins: ${KOSAIBARI_CORS_ALLOWED_ORIGINS:http://localhost:3001}
   upload:
     dir: ${UPLOAD_DIR:./uploads}
-    base-url: ${UPLOAD_BASE_URL:http://localhost:8082/api/uploads}
-  bkash:
-    base-url: ${BKASH_BASE_URL:https://tokenized.sandbox.bka.sh/v1.2.0-beta}
-    app-key: ${BKASH_APP_KEY:0vWQuCRGiUX7EPVjQDr0EUAYtc}
-    app-secret: ${BKASH_APP_SECRET:jcUNPBgbcqEDedNKdvE4G1cAK7D3hCjmJccNPZZBq96QIxxwAMEx}
-    username: ${BKASH_USERNAME:01770618567}
-    password: ${BKASH_PASSWORD:D7DaC<*E*eG}
-    callback-url: ${BKASH_CALLBACK_URL:http://localhost:3001/payment/callback}
+  # bKash merchant credentials are stored in the app_settings table (keys: bkash_*).
+  # Manage them via PATCH /admin/settings/{key} or POST /admin/settings/bkash.
 
 logging:
   level:

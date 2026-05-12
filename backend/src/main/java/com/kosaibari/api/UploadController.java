@@ -30,9 +30,6 @@ public class UploadController {
     @Value("${kosaibari.upload.dir:./uploads}")
     private String uploadDir;
 
-    @Value("${kosaibari.upload.base-url:http://localhost:8082/api/uploads}")
-    private String baseUrl;
-
     @PostMapping("/photo")
     public ResponseEntity<Map<String, Object>> uploadPhoto(@RequestParam("file") MultipartFile file) {
         User currentUser = UserContext.require();
@@ -65,7 +62,9 @@ public class UploadController {
             Path filePath = uploadPath.resolve(filename);
             file.transferTo(filePath.toFile());
 
-            String photoUrl = baseUrl + "/" + filename;
+            // Store path RELATIVE to API base. Frontend prepends API host when rendering.
+            // This way the same DB row works across environments (localhost / IP / domain).
+            String photoUrl = "/uploads/" + filename;
 
             // If user is a butcher, update their photo
             if (currentUser.getUserType() == User.UserType.BUTCHER) {

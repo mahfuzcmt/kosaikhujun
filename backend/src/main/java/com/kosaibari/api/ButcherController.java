@@ -26,11 +26,12 @@ public class ButcherController {
     public ResponseEntity<Map<String, Object>> search(
         @RequestParam(required = false) Integer districtId,
         @RequestParam(required = false) Integer thanaId,
+        @RequestParam(required = false) String q,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int limit
     ) {
-        List<ButcherDto> butchers = butcherService.search(districtId, thanaId, page, limit);
-        int total = butcherService.countApproved(districtId, thanaId);
+        List<ButcherDto> butchers = butcherService.search(districtId, thanaId, q, page, limit);
+        int total = butcherService.countApproved(districtId, thanaId, q);
 
         return ResponseEntity.ok(Map.of(
             "data", butchers,

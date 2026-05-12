@@ -52,6 +52,8 @@ pnpm-debug.log*
 .settings/
 *.swp
 *.swo
+.claude/settings.local.json
+.claude/projects/
 
 # ---- OS ----
 .DS_Store
