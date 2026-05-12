@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kosaibari-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: kosaibari
+      POSTGRES_USER: kosaibari
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-KosaiBari_Prod_2024}
+    volumes:
+      - kosaibari_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kosaibari"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kosaibari-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: kosaibari-redis
+    restart: unless-stopped
+    volumes:
+      - kosaibari_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kosaibari-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kosaibari-backend
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kosaibari
+      SPRING_DATASOURCE_USERNAME: kosaibari
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-KosaiBari_Prod_2024}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-KosaiBari_JWT_Secret_Production_2024_Change_Me}
+      SMS_API_KEY: ${SMS_API_KEY:-aXkWQS9rv1m75TJf9vWQ}
+      SMS_SENDER_ID: ${SMS_SENDER_ID:-8809617642636}
+      KOSAIBARI_CORS_ALLOWED_ORIGINS: http://103.187.22.131:3001,http://103.187.22.131,https://kosaibari.com
+      UPLOAD_DIR: /app/uploads
+      UPLOAD_BASE_URL: http://103.187.22.131:8082/api/uploads
+      BKASH_BASE_URL: https://tokenized.sandbox.bka.sh/v1.2.0-beta
+      BKASH_APP_KEY: 0vWQuCRGiUX7EPVjQDr0EUAYtc
+      BKASH_APP_SECRET: jcUNPBgbcqEDedNKdvE4G1cAK7D3hCjmJccNPZZBq96QIxxwAMEx
+      BKASH_USERNAME: "01770618567"
+      BKASH_PASSWORD: "D7DaC<*E*eG"
+      BKASH_CALLBACK_URL: http://103.187.22.131:3001/payment/callback
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - kosaibari_uploads:/app/uploads
+    networks:
+      - kosaibari-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://103.187.22.131:8082/api
+    container_name: kosaibari-frontend
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://103.187.22.131:8082/api
+    depends_on:
+      - backend
+    networks:
+      - kosaibari-network
+
+networks:
+  kosaibari-network:
+    driver: bridge
+
+volumes:
+  kosaibari_postgres_data:
+  kosaibari_redis_data:
+  kosaibari_uploads:
