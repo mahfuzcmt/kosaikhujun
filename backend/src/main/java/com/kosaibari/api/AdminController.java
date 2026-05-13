@@ -196,6 +196,9 @@ public class AdminController {
         if (req.containsKey("apiKey")) {
             settingsRepo.update("sms_api_key", req.get("apiKey"));
         }
+        if (req.containsKey("secretKey")) {
+            settingsRepo.update("sms_secret_key", req.get("secretKey"));
+        }
         if (req.containsKey("senderId")) {
             settingsRepo.update("sms_sender_id", req.get("senderId"));
         }

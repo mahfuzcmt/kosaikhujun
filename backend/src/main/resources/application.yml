@@ -59,9 +59,8 @@ kosaibari:
   otp:
     length: 4
     expiry-minutes: 5
-  sms:
-    api-key: ${SMS_API_KEY:aXkWQS9rv1m75TJf9vWQ}
-    sender-id: ${SMS_SENDER_ID:8809617642636}
+  # SMS provider settings live in the app_settings table (keys: sms_*).
+  # Manage them via POST /admin/settings/sms or PATCH /admin/settings/{key}.
   cors:
     allowed-origins: ${KOSAIBARI_CORS_ALLOWED_ORIGINS:http://localhost:3001}
   upload:

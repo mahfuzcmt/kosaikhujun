@@ -130,6 +130,19 @@ public class ButcherService {
         subscriptionRepo.unlockContact(customer.getId(), butcherId, sub.getId());
         subscriptionRepo.incrementContactsUsed(sub.getId());
 
+        // If the customer just exhausted their last remaining quota across all
+        // active subscriptions (and has no unlimited package), nudge them to buy more.
+        if (subscriptionRepo.findSubscriptionWithRemainingContacts(customer.getId()).isEmpty()) {
+            try {
+                if (currentUser.getPhone() != null) {
+                    smsService.sendContactLimitReached(currentUser.getPhone(), currentUser.getName());
+                    log.info("SMS sent to customer {} - contact view limit reached", currentUser.getPhone());
+                }
+            } catch (Exception smsEx) {
+                log.error("Failed to send contact-limit SMS to customer: {}", smsEx.getMessage());
+            }
+        }
+
         // Fetch butcher with updated unlock count
         Butcher butcher = butcherRepo.findById(butcherId)
             .orElseThrow(() -> new RuntimeException("Butcher not found"));
