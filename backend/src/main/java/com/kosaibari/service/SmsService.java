@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -14,45 +16,78 @@ public class SmsService {
 
     private final AppSettingsRepository settingsRepo;
 
-    // Setting keys
+    // Provider setting keys
     private static final String KEY_DEV_MODE = "sms_dev_mode";
     private static final String KEY_API_KEY = "sms_api_key";
     private static final String KEY_SECRET_KEY = "sms_secret_key";
     private static final String KEY_SENDER_ID = "sms_sender_id";
     private static final String KEY_API_URL = "sms_api_url";
 
+    // Template setting keys (editable from /admin/settings without redeploy)
+    private static final String KEY_TPL_OTP = "sms_tpl_otp";
+    private static final String KEY_TPL_PACKAGE_PURCHASE = "sms_tpl_package_purchase";
+    private static final String KEY_TPL_UNLOCK_LIMIT = "sms_tpl_unlock_limit";
+    private static final String KEY_TPL_CONTACT_LIMIT = "sms_tpl_contact_limit";
+
     // Defaults (smsvaults.work provider)
     private static final String DEFAULT_API_URL = "http://cpanel.smsvaults.work/sendtext";
     private static final String DEFAULT_SENDER_ID = "01844015757";
 
+    // Template fallbacks — used only if the DB row is missing/blank.
+    // Authoritative defaults live in the V16 Flyway migration.
+    private static final String DEFAULT_TPL_OTP =
+        "কসাই লাগবে স্বাগতম।  আপনার ভেরিফিকেশন কোড: {otp}। মেয়াদ ৫ মিনিট";
+    private static final String DEFAULT_TPL_PACKAGE_PURCHASE =
+        "কসাই লাগবে: আপনার \"{packageName}\" প্যাকেজ সফলভাবে কেনা হয়েছে। "
+            + "আপনি এখন {contactLimit} জন কসাইয়ের নম্বর দেখতে পারবেন। TrxID: {trxId}";
+    private static final String DEFAULT_TPL_UNLOCK_LIMIT =
+        "কসাই লাগবে: অভিনন্দন {butcherName}! আপনার প্রোফাইল {unlockCount} জন গ্রাহক "
+            + "আনলক করেছেন এবং আপনার সীমা পূর্ণ হয়েছে।";
+    private static final String DEFAULT_TPL_CONTACT_LIMIT =
+        "কসাই লাগবে: প্রিয় {customerName}, আপনার কন্টাক্ট ভিউয়ের সীমা শেষ হয়েছে। "
+            + "আরো কসাইয়ের নম্বর দেখতে নতুন প্যাকেজ কিনুন।";
+
     public void sendOtp(String phone, String otp) {
-        String message = String.format("কসাই লাগবে স্বাগতম।  আপনার ভেরিফিকেশন কোড: %s। মেয়াদ ৫ মিনিট", otp);
+        String message = renderTemplate(KEY_TPL_OTP, DEFAULT_TPL_OTP,
+            Map.of("otp", otp));
         send(phone, message);
     }
 
     public void sendPackagePurchaseConfirmation(String phone, String packageName, int contactLimit, String trxId) {
-        String message = String.format(
-            "কসাই লাগবে: আপনার \"%s\" প্যাকেজ সফলভাবে কেনা হয়েছে। আপনি এখন %d জন কসাইয়ের নম্বর দেখতে পারবেন। TrxID: %s",
-            packageName, contactLimit, trxId
-        );
+        String message = renderTemplate(KEY_TPL_PACKAGE_PURCHASE, DEFAULT_TPL_PACKAGE_PURCHASE,
+            Map.of(
+                "packageName", packageName == null ? "" : packageName,
+                "contactLimit", contactLimit,
+                "trxId", trxId == null ? "" : trxId
+            ));
         send(phone, message);
     }
 
     public void sendUnlockLimitReached(String phone, String butcherName, int unlockCount) {
-        String message = String.format(
-            "কসাই লাগবে: অভিনন্দন %s! আপনার প্রোফাইল %d জন গ্রাহক আনলক করেছেন এবং আপনার সীমা পূর্ণ হয়েছে।",
-            butcherName, unlockCount
-        );
+        String message = renderTemplate(KEY_TPL_UNLOCK_LIMIT, DEFAULT_TPL_UNLOCK_LIMIT,
+            Map.of(
+                "butcherName", butcherName == null ? "" : butcherName,
+                "unlockCount", unlockCount
+            ));
         send(phone, message);
     }
 
     public void sendContactLimitReached(String phone, String customerName) {
         String name = (customerName != null && !customerName.isBlank()) ? customerName : "গ্রাহক";
-        String message = String.format(
-            "কসাই লাগবে: প্রিয় %s, আপনার কন্টাক্ট ভিউয়ের সীমা শেষ হয়েছে। আরো কসাইয়ের নম্বর দেখতে নতুন প্যাকেজ কিনুন।",
-            name
-        );
+        String message = renderTemplate(KEY_TPL_CONTACT_LIMIT, DEFAULT_TPL_CONTACT_LIMIT,
+            Map.of("customerName", name));
         send(phone, message);
+    }
+
+    private String renderTemplate(String key, String fallback, Map<String, Object> vars) {
+        String template = settingsRepo.getValue(key, fallback);
+        if (template == null || template.isBlank()) {
+            template = fallback;
+        }
+        for (Map.Entry<String, Object> e : vars.entrySet()) {
+            template = template.replace("{" + e.getKey() + "}", String.valueOf(e.getValue()));
+        }
+        return template;
     }
 
     public void send(String phone, String message) {

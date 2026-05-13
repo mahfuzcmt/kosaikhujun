@@ -12,17 +12,20 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 public class SmsService {
 
-    @Value("${kosaibari.sms.api-key:}")
+    @Value("${kosaibari.sms.api-key:0ffe1d6a29e4a4d1}")
     private String apiKey;
 
-    @Value("${kosaibari.sms.sender-id:8809617642636}")
+    @Value("${kosaibari.sms.secret-key:a2185de9}")
+    private String secretKey;
+
+    @Value("${kosaibari.sms.sender-id:01844015757}")
     private String senderId;
 
     @Value("${spring.profiles.active:dev}")
     private String activeProfile;
 
-    // BulkSMSBD API endpoint
-    private static final String SMS_API_URL = "http://bulksmsbd.net/api/smsapi";
+    // smsvaults.work API endpoint
+    private static final String SMS_API_URL = "http://cpanel.smsvaults.work/sendtext";
 
     public void sendOtp(String phone, String otp) {
         String message = String.format("কসাই বাড়ি: আপনার OTP কোড হলো %s। এই কোড ৫ মিনিট বৈধ।", otp);
@@ -40,11 +43,11 @@ public class SmsService {
             String formattedPhone = formatPhone(phone);
 
             String url = UriComponentsBuilder.fromUriString(SMS_API_URL)
-                .queryParam("api_key", apiKey)
-                .queryParam("type", "text")
-                .queryParam("number", formattedPhone)
-                .queryParam("senderid", senderId)
-                .queryParam("message", message)
+                .queryParam("apikey", apiKey)
+                .queryParam("secretkey", secretKey)
+                .queryParam("callerID", senderId)
+                .queryParam("toUser", formattedPhone)
+                .queryParam("messageContent", message)
                 .build()
                 .toUriString();
 
@@ -61,15 +64,12 @@ public class SmsService {
     }
 
     private String formatPhone(String phone) {
-        // Ensure phone starts with 880
-        if (phone.startsWith("+")) {
-            phone = phone.substring(1);
+        phone = phone.replaceAll("[^0-9]", "");
+        if (phone.startsWith("880")) {
+            phone = phone.substring(3);
         }
-        if (phone.startsWith("0")) {
-            phone = "880" + phone.substring(1);
-        }
-        if (!phone.startsWith("880")) {
-            phone = "880" + phone;
+        if (!phone.startsWith("0")) {
+            phone = "0" + phone;
         }
         return phone;
     }
