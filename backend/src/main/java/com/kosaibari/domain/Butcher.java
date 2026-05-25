@@ -12,9 +12,9 @@ public class Butcher {
     private UUID userId;
     private String whatsapp;
     private String photoUrl;
-    private Integer cowPrice;
+    private BigDecimal cowPrice;
     private PriceType cowPriceType;
-    private Integer goatPrice;
+    private BigDecimal goatPrice;
     private PriceType goatPriceType;
     private Integer cowCapacity;
     private Integer goatCapacity;

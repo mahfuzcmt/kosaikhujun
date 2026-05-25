@@ -135,8 +135,8 @@ public class CustomerRepository {
                 b.setUserId(UUID.fromString(rs.getString("user_id")));
                 b.setWhatsapp(rs.getString("whatsapp"));
                 b.setPhotoUrl(rs.getString("photo_url"));
-                b.setCowPrice(rs.getObject("cow_price", Integer.class));
-                b.setGoatPrice(rs.getObject("goat_price", Integer.class));
+                b.setCowPrice(rs.getBigDecimal("cow_price"));
+                b.setGoatPrice(rs.getBigDecimal("goat_price"));
                 b.setCowCapacity(rs.getObject("cow_capacity", Integer.class));
                 b.setGoatCapacity(rs.getObject("goat_capacity", Integer.class));
                 b.setRating(rs.getBigDecimal("rating"));

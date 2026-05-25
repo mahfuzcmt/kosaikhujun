@@ -1,15 +1,16 @@
 package com.kosaibari.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public record ButcherRegisterRequest(
     String name,
     String whatsapp,
     List<Integer> thanaIds,
-    Integer cowPrice,
-    String cowPriceType,  // PER_ANIMAL or PER_KG
-    Integer goatPrice,
-    String goatPriceType, // PER_ANIMAL or PER_KG
+    BigDecimal cowPrice,
+    String cowPriceType,  // PER_ANIMAL, PER_KG or PERCENTAGE
+    BigDecimal goatPrice,
+    String goatPriceType, // PER_ANIMAL, PER_KG or PERCENTAGE
     Integer cowCapacity,
     Integer goatCapacity
 ) {}

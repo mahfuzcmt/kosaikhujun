@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -24,10 +25,10 @@ public class ButcherRepository {
         b.setUserId(UUID.fromString(rs.getString("user_id")));
         b.setWhatsapp(rs.getString("whatsapp"));
         b.setPhotoUrl(rs.getString("photo_url"));
-        b.setCowPrice(rs.getObject("cow_price", Integer.class));
+        b.setCowPrice(rs.getBigDecimal("cow_price"));
         String cowPriceType = rs.getString("cow_price_type");
         if (cowPriceType != null) b.setCowPriceType(Butcher.PriceType.valueOf(cowPriceType));
-        b.setGoatPrice(rs.getObject("goat_price", Integer.class));
+        b.setGoatPrice(rs.getBigDecimal("goat_price"));
         String goatPriceType = rs.getString("goat_price_type");
         if (goatPriceType != null) b.setGoatPriceType(Butcher.PriceType.valueOf(goatPriceType));
         b.setCowCapacity(rs.getObject("cow_capacity", Integer.class));
@@ -218,14 +219,14 @@ public class ButcherRepository {
     }
 
     public Butcher create(UUID userId, String whatsapp, String photoUrl,
-                          Integer cowPrice, Integer goatPrice,
+                          BigDecimal cowPrice, BigDecimal goatPrice,
                           Integer cowCapacity, Integer goatCapacity,
                           List<Integer> thanaIds) {
         UUID id = UUID.randomUUID();
         jdbc.update(
             """
             INSERT INTO butchers (id, user_id, whatsapp, photo_url, cow_price, goat_price, cow_capacity, goat_capacity, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'APPROVED')
             """,
             id, userId, whatsapp, photoUrl, cowPrice, goatPrice, cowCapacity, goatCapacity
         );
@@ -241,21 +242,21 @@ public class ButcherRepository {
     }
 
     public Butcher create(UUID userId, String whatsapp,
-                          Integer cowPrice, Integer goatPrice,
+                          BigDecimal cowPrice, BigDecimal goatPrice,
                           Integer cowCapacity, Integer goatCapacity) {
         return create(userId, whatsapp, cowPrice, Butcher.PriceType.PER_ANIMAL,
                       goatPrice, Butcher.PriceType.PER_ANIMAL, cowCapacity, goatCapacity);
     }
 
     public Butcher create(UUID userId, String whatsapp,
-                          Integer cowPrice, Butcher.PriceType cowPriceType,
-                          Integer goatPrice, Butcher.PriceType goatPriceType,
+                          BigDecimal cowPrice, Butcher.PriceType cowPriceType,
+                          BigDecimal goatPrice, Butcher.PriceType goatPriceType,
                           Integer cowCapacity, Integer goatCapacity) {
         UUID id = UUID.randomUUID();
         jdbc.update(
             """
             INSERT INTO butchers (id, user_id, whatsapp, cow_price, cow_price_type, goat_price, goat_price_type, cow_capacity, goat_capacity, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'APPROVED')
             """,
             id, userId, whatsapp, cowPrice, cowPriceType.name(), goatPrice, goatPriceType.name(), cowCapacity, goatCapacity
         );
@@ -351,8 +352,8 @@ public class ButcherRepository {
     }
 
     public void updateProfile(UUID butcherId, String whatsapp, String photoUrl,
-                              Integer cowPrice, Butcher.PriceType cowPriceType,
-                              Integer goatPrice, Butcher.PriceType goatPriceType,
+                              BigDecimal cowPrice, Butcher.PriceType cowPriceType,
+                              BigDecimal goatPrice, Butcher.PriceType goatPriceType,
                               Integer cowCapacity, Integer goatCapacity) {
         jdbc.update(
             """

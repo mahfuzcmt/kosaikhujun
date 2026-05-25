@@ -193,14 +193,11 @@ public class AdminController {
         if (req.containsKey("devMode")) {
             settingsRepo.update("sms_dev_mode", req.get("devMode"));
         }
-        if (req.containsKey("apiKey")) {
-            settingsRepo.update("sms_api_key", req.get("apiKey"));
+        if (req.containsKey("userId")) {
+            settingsRepo.update("sms_user_id", req.get("userId"));
         }
-        if (req.containsKey("secretKey")) {
-            settingsRepo.update("sms_secret_key", req.get("secretKey"));
-        }
-        if (req.containsKey("senderId")) {
-            settingsRepo.update("sms_sender_id", req.get("senderId"));
+        if (req.containsKey("password")) {
+            settingsRepo.update("sms_password", req.get("password"));
         }
         if (req.containsKey("apiUrl")) {
             settingsRepo.update("sms_api_url", req.get("apiUrl"));

@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -186,8 +187,8 @@ public class ButcherService {
 
     @Transactional
     public Butcher updateProfile(String name, String whatsapp, String photoUrl,
-                                  Integer cowPrice, String cowPriceType,
-                                  Integer goatPrice, String goatPriceType,
+                                  BigDecimal cowPrice, String cowPriceType,
+                                  BigDecimal goatPrice, String goatPriceType,
                                   Integer cowCapacity, Integer goatCapacity,
                                   List<Integer> thanaIds) {
         User currentUser = UserContext.require();

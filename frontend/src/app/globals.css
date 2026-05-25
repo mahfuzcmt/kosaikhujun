@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-primary: #1B8B4B;
+  --color-primary-dark: #156B3A;
+  --color-primary-light: #E8F5EE;
+  --color-danger: #DC2626;
+  --color-warning: #F59E0B;
+
+  /* Font */
+  --font-bengali: 'Hind Siliguri', sans-serif;
+}
+
+/* Slightly larger base font site-wide (was 16px). */
+html {
+  font-size: 17px;
+}
+
+body {
+  font-family: var(--font-bengali), 'Hind Siliguri', sans-serif;
+}
+
+/* Desktop: constrain content to 70% width, centered.
+   Applies from large screens up; mobile stays full-width. */
+.app-shell {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 1024px) {
+  .app-shell {
+    width: 70%;
+    max-width: 1280px;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.04);
+    background-color: white;
+    min-height: 100vh;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+/* Input focus styles */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+}
+
+/* Loading spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 9999px;
+  height: 2rem;
+  width: 2rem;
+  border-width: 4px;
+  border-color: var(--color-primary);
+  border-top-color: transparent;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Button styles */
+.btn-primary {
+  display: block;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  display: block;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background-color: white;
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  border-radius: 0.75rem;
+  border: 2px solid var(--color-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-primary-light);
+}
+
+/* Card styles */
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -82,9 +83,9 @@ public class ButcherController {
         String name = (String) req.get("name");
         String whatsapp = (String) req.get("whatsapp");
         String photoUrl = (String) req.get("photoUrl");
-        Integer cowPrice = req.get("cowPrice") != null ? ((Number) req.get("cowPrice")).intValue() : null;
+        BigDecimal cowPrice = req.get("cowPrice") != null ? new BigDecimal(req.get("cowPrice").toString()) : null;
         String cowPriceType = (String) req.get("cowPriceType");
-        Integer goatPrice = req.get("goatPrice") != null ? ((Number) req.get("goatPrice")).intValue() : null;
+        BigDecimal goatPrice = req.get("goatPrice") != null ? new BigDecimal(req.get("goatPrice").toString()) : null;
         String goatPriceType = (String) req.get("goatPriceType");
         Integer cowCapacity = req.get("cowCapacity") != null ? ((Number) req.get("cowCapacity")).intValue() : null;
         Integer goatCapacity = req.get("goatCapacity") != null ? ((Number) req.get("goatCapacity")).intValue() : null;
